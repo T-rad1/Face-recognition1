@@ -3,7 +3,7 @@ import socketserver
 import os
 
 def httpp():
-    class CustomHandler(http.server.SimpleHTtPRequestHandler):
+    class CustomHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
             if self.path == "CHECK.txt" :
                 self.path = "CHECK.txt"
