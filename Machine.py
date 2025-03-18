@@ -5,34 +5,74 @@ import dateparser
 from datetime import datetime, timedelta
 import httpp
 import time
-
+import threading
 #متغیر ها
 n=0
 #تبدیل به تابع برای ایمپوت کردن
 def machine(message):
-    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای برسی درخواست ذخیره عکس
+    print(0)
+    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست ذخیره عکس
     with open("CHECK.txt", "r", encoding="utf-8") as file:
         file_data1 = set(file.read().splitlines())
+
     if "1" in file_data1:
-        with open("CHECK.txt", "a", encoding="utf-8") as file:
-            file.write(message)
-        httpp.httpp()
-        # دادن پیام پایان فعالیت
-        time.sleep(5)
-        yield "عکس رو گرفتم فقط برای احتیاط, دانش اموز دو یا سه ثانیه جلو دوربین بایستد, ممنون"
-        with open("CHECK.txt", "w") as file:
+        with open("CHECK.txt", "w", encoding="utf-8") as file:
+            file.write(message + "\n")
+            file.write("2\n")
+        with open("CHECK.txt", "r", encoding="utf-8") as file:
+            file_data1 = set(file.read().splitlines())
+        print(file_data1)  # برای دیباگ، محتوای فایل را نمایش بده
+
+        with open("CHECK.txt", "r", encoding="utf-8") as file:
+            file_data1 = set(file.read().splitlines())
+        return "لطفا کلاس دانش آموز را وارد کنید"
+
+    if "2" in file_data1:
+        # اضافه کردن پیام به فایل
+        with open("CHECK.txt", "a+", encoding="utf-8") as file:
+            file.write(message + "\n")
+        with open("CHECK.txt", "r", encoding="utf-8") as file:
+            #انتفال دیتا دانش آموز جدید به لیست داده
+            file_data2 = file.read().splitlines()
+        #دادن مقدار به فایل دیتا مربوط به کلاس کاربر با توجه به درخواست
+        print(file_data2)
+        if "هفتم" in file_data2:
+            print(990)
+            with open("seven.txt","a",encoding="utf-8") as file:
+                file.write(file_data2[0]+"\n")
+        elif "هشتم" in file_data2:
+            with open("eight.txt","a",encoding="utf-8") as file:
+                file.write(file_data2[0]+"\n")
+        elif "نهم" in file_data2:
+            with open("nine.txt","a",encoding="utf-8") as file:
+                file.write(file_data2[0]+"\n")
+        # اجرای سرور در یک ترد جداگانه
+        threading.Thread(target=httpp.httpp, daemon=True).start()
+
+         
+        # پاک کردن فایل بعد از 15 ثانیه
+        time.sleep(15)
+        with open("CHECK.txt", "w", encoding="utf-8") as file:
             file.write("")
-        
+        print(9)  # برای دیباگ
+
+
+        return "عکس رو گرفتم فقط برای احتیاط, دانش آموز دو یا سه ثانیه جلو دوربین بایستد, ممنون"
+    
     else:
         class result:
             def __init__(self,date):
                 self.date=date
+
                 # نام فایل متنی
                 self.file_name = f"{self.date}.txt"
                 # لیست داده‌هایی که می‌خواهید بررسی کنید
-                self.seven_list=['هیراد','Taha']
-                self.eight_list=['Hirad','Matin']
-                self.nine_list=['Hirad','Rastin']
+                with open("seven.txt", "r",encoding='utf-8') as file:
+                    self.seven_list= file.read().splitlines()
+                with open("eight.txt","r",encoding="utf-8") as file:
+                    self.eight_list=file.read().splitlines()
+                with open("nine.txt","r",encoding="utf-8") as file:
+                    self.nine_list=file.read().splitlines()
             
                 #لیست افراد حاضر
                 self.pressent_seven=[]
@@ -126,12 +166,12 @@ def machine(message):
             "پرینت حاضرین دیروز ",
             "پرینت کن حاضرین پریروز رو ",
             "حاضرین پریروز رو پرینت کن",
-            "پرینت حاضرین پریروز "
+            "پرینت حاضرین پریروز ",
             "ذخیره عکس",
             "اضافه کردن عکس",
             "ثبت عکس"
         ]
-        labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22,31] #مقددار دهی دستور ها
+        labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22,31,31,31] #مقددار دهی دستور ها
 
         # مرحله ۱: استخراج ویژگی‌های متنی با TF-IDF
         vectorizer = TfidfVectorizer()
@@ -192,5 +232,6 @@ def machine(message):
             else:
                 return p.absent()
         elif pred==31:
-            return "لطفا عکس کاربر رو وارد کن"
-        
+            with open("CHECK.txt",'a') as file:
+                file.write("1")
+            return "لطفا نام کاربر رو وارد کن"
